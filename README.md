@@ -1,4 +1,4 @@
-# resunet-plus-plus-tensorflow
+# resunet-pp-tensorflow
 
 Implements [ResUnet++](https://arxiv.org/pdf/1911.07067.pdf) for semantic segmentation using Tensorflow 2.0.
 
@@ -6,7 +6,7 @@ Implements [ResUnet++](https://arxiv.org/pdf/1911.07067.pdf) for semantic segmen
 Run following script from your target python virtual environment
 
 ```shell
-python -m pip install git+https://github.com/JanPalasek/resunet-plus-plus-tensorflow
+python -m pip install git+https://github.com/JanPalasek/resunet-pp-tensorflow
 ```
 
 ## Requirements

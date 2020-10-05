@@ -47,7 +47,7 @@ def ResUNetPlusPlus(input_shape, classes: int, filters_root: int = 64, depth: in
         layer = Concatenate()([layer, skip_block_connection])
         layer = ResBlock(filters, strides=1)(layer)
 
-    # layer = AtrousSpatialPyramidPooling(filters, dilation_rates=[2, 4, 8])(layer)
+    layer = AtrousSpatialPyramidPooling(filters, dilation_rates=[2, 4, 8])(layer)
     layer = Conv2D(filters=classes, kernel_size=1, strides=1, padding="same")(layer)
     layer = Softmax()(layer)
 

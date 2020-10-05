@@ -36,9 +36,9 @@ if __name__ == "__main__":
 
     train_dataset = list(zip(*list(SimpleDataset(args.train_dataset_dir_path)())))
     train_dataset = (np.array(train_dataset[0]), np.array(train_dataset[1]))
-    x = np.array(train_dataset[0])[:5]
-    y = np.array(train_dataset[1])[:5]
+    x = np.array(train_dataset[0])
+    y = np.array(train_dataset[1])
 
     validation_dataset = list(zip(*list(SimpleDataset(args.validation_dataset_dir_path)())))
-    validation_dataset = (np.array(validation_dataset[0])[:5], np.array(validation_dataset[1])[:5])
+    validation_dataset = (np.array(validation_dataset[0]), np.array(validation_dataset[1]))
     model.fit(x=x, y=y, validation_data=validation_dataset, epochs=args.epochs, batch_size=args.batch_size)

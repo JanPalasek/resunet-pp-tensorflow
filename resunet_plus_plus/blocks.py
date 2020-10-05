@@ -131,39 +131,7 @@ class SelfAttentionBlock(Layer):
         return output
 
     def get_config(self):
-        return dict(filters=self.filters, **super(SelfAttentionBlock, self).get_config())
-
-
-class SeparableConvolutionBlock(Layer):
-    def __init__(self, filters, strides, dilation_rate, **kwargs):
-        super(SeparableConvolutionBlock, self).__init__(**kwargs)
-
-        self.filters = filters
-        self.strides = strides
-        self.dilation_rate = dilation_rate
-
-        self.depth_conv_1 = DepthwiseConv2D(kernel_size=3, strides=strides,
-                                            dilation_rate=dilation_rate, padding="same",
-                                            use_bias=False)
-        self.bn_1 = BatchNormalization()
-        self.relu_1 = ReLU()
-
-        self.conv_1 = Conv2D(filters=filters, kernel_size=1, strides=1, padding="same", use_bias=False)
-        self.bn_2 = BatchNormalization()
-        self.relu_2 = ReLU()
-
-    def call(self, inputs, training=None) -> Layer:
-        x = inputs
-
-        x = self.depth_conv_1(x, training=training)
-        x = self.bn_1(x, training=training)
-        x = self.relu_1(x)
-
-        x = self.conv_1(x, training=training)
-        x = self.bn_2(x, training=training)
-        x = self.relu_2(x)
-
-        return x
+        return dict(ratio=self.ratio, **super(SelfAttentionBlock, self).get_config())
 
 
 class AtrousSpatialPyramidPooling(Layer):
@@ -173,30 +141,37 @@ class AtrousSpatialPyramidPooling(Layer):
         self.filters = filters
         self.dilation_rates = dilation_rates
 
-        self.sep_conv_block_1 = SeparableConvolutionBlock(filters=filters, strides=1,
-                                                          dilation_rate=1)
+        self.conv_1 = Conv2D(kernel_size=3, filters=filters, strides=1, dilation_rate=1, padding="same")
+        self.bn_1 = BatchNormalization()
+        self.relu_1 = ReLU()
 
-        self.sep_conv_block_2 = SeparableConvolutionBlock(filters=filters, strides=1,
-                                                          dilation_rate=dilation_rates[0])
+        self.conv_2 = Conv2D(kernel_size=3, filters=filters, strides=1, dilation_rate=dilation_rates[0],
+                                       padding="same")
+        self.bn_2 = BatchNormalization()
+        self.relu_2 = ReLU()
 
-        self.sep_conv_block_3 = SeparableConvolutionBlock(filters=filters, strides=1,
-                                                          dilation_rate=dilation_rates[1])
+        self.conv_3 = Conv2D(kernel_size=3, filters=filters, strides=1, dilation_rate=dilation_rates[1],
+                                       padding="same")
+        self.bn_3 = BatchNormalization()
+        self.relu_3 = ReLU()
 
-        self.sep_conv_block_4 = SeparableConvolutionBlock(filters=filters, strides=1,
-                                                          dilation_rate=dilation_rates[2])
+        self.conv_4 = Conv2D(kernel_size=3, filters=filters, strides=1, dilation_rate=dilation_rates[2],
+                                       padding="same")
+        self.bn_4 = BatchNormalization()
+        self.relu_4 = ReLU()
 
         self.gap_1 = GlobalAveragePooling2D()
         self.reshape_1 = None
-        self.conv_1 = Conv2D(filters=filters, kernel_size=1, padding="same", use_bias=False)
-        self.bn_1 = BatchNormalization()
-        self.relu_1 = ReLU()
+        self.conv_5 = Conv2D(filters=filters, kernel_size=1, padding="same", use_bias=False)
+        self.bn_5 = BatchNormalization()
+        self.relu_5 = ReLU()
         self.upsample_1 = None
 
         # merged layers
         self.concatenate_1 = Concatenate()
-        self.conv_2 = Conv2D(filters=filters, kernel_size=1, padding="same", use_bias=False)
-        self.bn_2 = BatchNormalization()
-        self.relu_2 = ReLU()
+        self.conv_6 = Conv2D(filters=filters, kernel_size=1, padding="same", use_bias=False)
+        self.bn_6 = BatchNormalization()
+        self.relu_6 = ReLU()
 
     def build(self, input_shape):
         orig_size = input_shape[1:-1]
@@ -208,21 +183,37 @@ class AtrousSpatialPyramidPooling(Layer):
     def call(self, inputs, training=None):
         x = inputs
 
-        x1 = self.sep_conv_block_1(x, training=training)
-        x2 = self.sep_conv_block_2(x, training=training)
-        x3 = self.sep_conv_block_3(x, training=training)
-        x4 = self.sep_conv_block_4(x, training=training)
+        x1 = self.conv_1(x, training=training)
+        x1 = self.bn_1(x1, training=training)
+        x1 = self.relu_1(x1)
+
+        x2 = self.conv_2(x, training=training)
+        x2 = self.bn_2(x2, training=training)
+        x2 = self.relu_2(x2)
+
+        x3 = self.conv_3(x, training=training)
+        x3 = self.bn_3(x3, training=training)
+        x3 = self.relu_3(x3)
+
+        x4 = self.conv_4(x, training=training)
+        x4 = self.bn_4(x4, training=training)
+        x4 = self.relu_4(x4)
 
         x5 = self.gap_1(x)
         x5 = self.reshape_1(x5)
-        x5 = self.conv_1(x5)
-        x5 = self.bn_1(x5, training=training)
-        x5 = self.relu_1(x5)
+        x5 = self.conv_5(x5)
+        x5 = self.bn_5(x5, training=training)
+        x5 = self.relu_5(x5)
         x5 = self.upsample_1(x5)
 
         x = self.concatenate_1([x1, x2, x3, x4, x5])
-        x = self.conv_2(x)
-        x = self.bn_2(x, training=training)
-        x = self.relu_2(x)
+        x = self.conv_6(x)
+        x = self.bn_6(x, training=training)
+        x = self.relu_6(x)
 
         return x
+
+    def get_config(self):
+        return dict(filters=self.filters,
+                    dilation_rates=self.dilation_rates,
+                    **super(AtrousSpatialPyramidPooling, self).get_config())

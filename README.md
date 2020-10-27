@@ -15,3 +15,4 @@ python -m pip install git+https://github.com/JanPalasek/resunet-pp-tensorflow
 ## References
 - ResUnet++ - https://arxiv.org/pdf/1911.07067.pdf
 - PyTorch implementation - https://github.com/rishikksh20/ResUnet
+- Official Tensorflow implementation - https://github.com/DebeshJha/ResUNetPlusPlus

@@ -2,6 +2,8 @@
 
 Implements [ResUnet++](https://arxiv.org/pdf/1911.07067.pdf) for semantic segmentation using Tensorflow 2.0.
 
+**Note that it's still Work In Progress**
+
 ## How to install model to your own project
 Run following script from your target python virtual environment
 
